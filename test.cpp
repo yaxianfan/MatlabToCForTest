@@ -2,6 +2,7 @@
 #include<vector>
 using namespace std;
 
+#define M_PI acos(-1)
 //快速傅里叶变换fft
 void fft(double* real, double* imag, double* outReal, double* outImage, int size) {
     const double PI = acos(-1.0);
@@ -39,7 +40,7 @@ void fft(double* real, double* imag, double* outReal, double* outImage, int size
 
     
 }
-
+/*
 int main()
 {
     int size = 256;
@@ -82,4 +83,121 @@ int main()
     cout << endl;
     cout << "done" << endl;
 
-} 
+} */
+
+void unwrap_array(double* in, double* out, int len) {
+    out[0] = in[0];
+    for (int i = 1; i < len; i++) {
+        double d = in[i] - in[i - 1];
+        d = d > M_PI ? d - 2 * M_PI : (d < -M_PI ? d + 2 * M_PI : d);
+        out[i] = out[i - 1] + d;
+    }
+}
+
+double pairwiseUnwrap(double phase1, double phase2) {
+    while (fabs(phase1 - phase2) > M_PI) {
+
+        if (phase1 > phase2 + M_PI) {
+            phase1 = phase1 - 2 * M_PI;
+        }
+        else if (phase1 < phase2 - M_PI) {
+            phase1 = phase1 + 2 * M_PI;
+        }
+        else {
+            break;
+        }
+
+    }
+    double result = phase1 - phase2;
+    return result;
+};
+
+bool IsWrap(double phase1, double phase2)
+{
+    return ((phase1 - phase2) > M_PI || (phase1 - phase2) < -M_PI);
+}
+
+double wrapNum(double phase1, double phase2)
+{
+    if ((phase1 - phase2) > M_PI)
+    {
+        while (1)
+        {
+            phase2 = phase2 + 2 * M_PI;
+            if ((phase1 - phase2) < M_PI && (phase1 - phase2) > -M_PI)
+            {
+                break;
+            }
+        }
+    }
+    else if ((phase1 - phase2) < -M_PI)
+    {
+        while (1)
+        {
+            phase2 = phase2 - 2 * M_PI;
+            if ((phase1 - phase2) < M_PI && (phase1 - phase2) > -M_PI)
+            {
+                break;
+            }
+        }
+    }
+    return phase2;
+}
+
+//void unwrapVec(double* vec, int size)
+//{
+//    for (size_t i = 1; i < size; i++)
+//    {
+//        vec[i] = wrapNum(vec[i - 1], vec[i]);
+//    }
+//}
+void unwrapVec(double* vec, int size)
+{
+    for (size_t i = 1; i < size; i++)
+    {
+        //vec[i] = wrapNum(vec[i - 1], vec[i]);
+        if ((vec[i - 1] - vec[i]) > M_PI)
+        {
+            while (1)
+            {
+                vec[i] = vec[i] + 2 * M_PI;
+                if ((vec[i - 1] - vec[i]) < M_PI && (vec[i - 1] - vec[i]) > -M_PI)
+                {
+                    break;
+                }
+            }
+        }
+        else if ((vec[i - 1] - vec[i]) < -M_PI)
+        {
+            while (1)
+            {
+                vec[i] = vec[i] - 2 * M_PI;
+                if ((vec[i - 1] - vec[i]) < M_PI && (vec[i - 1] - vec[i]) > -M_PI)
+                {
+                    break;
+                }
+            }
+        }
+    }
+}
+int main()
+{
+    double* aa = nullptr;
+    aa = (double*)malloc(sizeof(double) * 6);
+    aa[0] = -12;
+    aa[1] = 22;
+    aa[2] = 35;
+    aa[3] = 1;
+    aa[4] = 19;
+    aa[5] = -0.8;
+    unwrapVec(aa, 6);
+    for (size_t i = 0; i < 6; i++)
+    {
+        cout << aa[i] << endl;
+    }
+
+    //double res = wrapNum(1, 1);
+
+    
+    //cout << res << endl;
+}
